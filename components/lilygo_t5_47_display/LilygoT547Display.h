@@ -8,7 +8,7 @@
 
 #ifndef EPD_DRIVER
 #define EPD_DRIVER
-#include "epd_driver.h"
+#include "epdiy.h"
 #include "epd_highlevel.h"
 #endif
 
