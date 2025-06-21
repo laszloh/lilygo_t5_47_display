@@ -9,27 +9,24 @@ from esphome.const import (
 )
 from esphome.const import __version__ as ESPHOME_VERSION
 
-CONF_CLEAR = "clear"
-CONF_TEMPERATURE = "temperature"
-CONF_LANDSCAPE = "landscape"
-CONF_POWER_OFF_DELAY_ENABLED = "power_off_delay_enabled"
+from .. import lilygo_t5_47_ns
 
-Epaper_ns = cg.esphome_ns.namespace("lilygo_t5_47_display")
-Epaper = Epaper_ns.class_(
+CONF_CYCLES_RENDER = "cycles_render"
+CONF_CYCLES_INVERT = "cycles_invert"
+
+Display = lilygo_t5_47_ns.class_(
     "LilygoT547Display", cg.PollingComponent, display.DisplayBuffer
 )
 
 CONFIG_SCHEMA = cv.All(
     display.FULL_DISPLAY_SCHEMA.extend(
         {
-            cv.GenerateID(): cv.declare_id(Epaper),
-            cv.Optional(CONF_FULL_UPDATE_EVERY, default=10): cv.uint32_t,
-            cv.Optional(CONF_CLEAR, default=True): cv.boolean,
-            cv.Optional(CONF_POWER_OFF_DELAY_ENABLED, default=False): cv.boolean,
-            cv.Optional(CONF_LANDSCAPE, default=True): cv.boolean,
-            cv.Optional(CONF_TEMPERATURE, default=23): cv.uint32_t,
+            cv.GenerateID(): cv.declare_id(Display),
+            cv.Optional(CONF_FULL_UPDATE_EVERY, default=1): cv.uint32_t,
+            cv.Optional(CONF_CYCLES_RENDER, default=20): cv.uint32_t,
+            cv.Optional(CONF_CYCLES_INVERT, default=20): cv.uint32_t,
         }
-    ).extend(cv.polling_component_schema("5s")),
+    ).extend(cv.polling_component_schema("60s")),
     cv.has_at_most_one_key(CONF_PAGES, CONF_LAMBDA),
 )
 
@@ -41,6 +38,10 @@ async def to_code(config):
         await cg.register_component(var, config)
     await display.register_display(var, config)
 
+    cg.add(var.set_full_update_every(config[CONF_FULL_UPDATE_EVERY]))
+    cg.add(var.set_cycles_render(config[CONF_CYCLES_RENDER]))
+    cg.add(var.set_cycles_invert(config[CONF_CYCLES_INVERT]))
+
     if CONF_LAMBDA in config:
         if cv.Version.parse(ESPHOME_VERSION) < cv.Version.parse("2023.7.0"):
             displayRef = display.DisplayBufferRef
@@ -50,11 +51,8 @@ async def to_code(config):
             config[CONF_LAMBDA], [(displayRef, "it")], return_type=cg.void
         )
         cg.add(var.set_writer(lambda_))
-    cg.add(var.set_clear_screen(config[CONF_CLEAR]))
-    cg.add(var.set_temperature(config[CONF_TEMPERATURE]))
-    cg.add(var.set_landscape(config[CONF_LANDSCAPE]))
-    cg.add(var.set_power_off_delay_enabled(config[CONF_POWER_OFF_DELAY_ENABLED]))
-    cg.add_library("https://github.com/vroland/epdiy.git", None)
-    cg.add_build_flag("-DBOARD_HAS_PSRAM")
+
+    cg.add_library("https://github.com/ashald/platformio-epdiy-monochrome.git", None)
+
     cg.add_build_flag("-DCONFIG_EPD_DISPLAY_TYPE_ED047TC1")
     cg.add_build_flag("-DCONFIG_EPD_BOARD_REVISION_LILYGO_T5_47")

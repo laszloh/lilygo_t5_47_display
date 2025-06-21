@@ -1,5 +1,8 @@
 # Prerequisites
 *.d
+.esphome/
+.vscode/
+**/__pycache__/
 
 # Compiled Object files
 *.slo
