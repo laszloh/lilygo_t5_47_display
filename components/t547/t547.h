@@ -7,10 +7,6 @@
 
 #include "epd_driver.h"
 
-#define USE_ESP32_FRAMEWORK_ARDUINO
-
-#ifdef USE_ESP32_FRAMEWORK_ARDUINO
-
 namespace esphome {
 namespace t547 {
 
@@ -21,21 +17,23 @@ class T547 : public PollingComponent, public display::DisplayBuffer {
 #endif  // VERSION_CODE(2023, 12, 0)
  public:
   void set_greyscale(bool greyscale) { this->greyscale_ = greyscale; }
-  void set_clear(bool clear) { this->clear_ = clear; }
+  void set_cycles(size_t cycles) { this->cycles_ = cycles; }
+  void set_cleantime(size_t cleantime) {this->cleantime_ = cleantime; }
 
   float get_setup_priority() const override;
 
   void dump_config() override;
 
   void display();
-  void clear();
+  void clean();
   void update() override;
 
   void setup() override;
 
   uint8_t get_panel_state() const { return this->panel_on_; }
   bool get_greyscale() const { return this->greyscale_; }
-  bool get_clear() const { return this->clear_; }
+  size_t get_cycles() const { return this->cycles_; }
+  size_t get_cleantime() const { return this->cleantime_; }
 
 #if ESPHOME_VERSION_CODE >= VERSION_CODE(2022,6,0)
   display::DisplayType get_display_type() override {
@@ -61,11 +59,10 @@ class T547 : public PollingComponent, public display::DisplayBuffer {
   uint8_t temperature_;
 
   bool greyscale_;
-  bool clear_;
+  size_t cycles_;
+  size_t cleantime_;
 
 };
 
 }  // namespace T547
 }  // namespace esphome
-
-#endif  // USE_ESP32_FRAMEWORK_ARDUINO

@@ -2,7 +2,6 @@
 #include "esphome/core/log.h"
 #include "esphome/core/application.h"
 #include "esphome/core/helpers.h"
-#ifdef USE_ESP32_FRAMEWORK_ARDUINO
 
 #include <esp32-hal-gpio.h>
 
@@ -32,7 +31,7 @@ void T547::setup() {
   ESP_LOGV(TAG, "Initialize complete");
 }
 
-float T547::get_setup_priority() const { return setup_priority::PROCESSOR; }
+float T547::get_setup_priority() const { return setup_priority::HARDWARE; }
 size_t T547::get_buffer_length_() {
     return this->get_width_internal() * this->get_height_internal() / 2;
 }
@@ -51,11 +50,15 @@ void HOT T547::draw_absolute_pixel_internal(int x, int y, Color color) {
 
 void T547::dump_config() {
   LOG_DISPLAY("", "T547", this);
+  ESP_LOGCONFIG(TAG, "  greyscale: %s", TRUEFALSE(this->greyscale_));
+  // ESP_LOGCONFIG(TAG, "  clear: %s", TRUEFALSE(this->clear_));
+  ESP_LOGCONFIG(TAG, "  cycles: %d", this->cycles_);
+  ESP_LOGCONFIG(TAG, "  cleantime: %d", this->cleantime_);
   LOG_UPDATE_INTERVAL(this);
 }
 
-void T547::clear() {
-  epd_clear();
+void T547::clean() {
+  epd_clear_area_cycles(epd_full_screen(), this->cycles_, this->cleantime_);
 }
 
 void T547::eink_off_() {
@@ -79,8 +82,6 @@ void T547::display() {
   uint32_t start_time = millis();
 
   epd_poweron();
-  if(clear_)
-    epd_clear();
   epd_draw_grayscale_image(epd_full_screen(), this->buffer_);
   epd_poweroff();
 
@@ -89,5 +90,3 @@ void T547::display() {
 
 }  // namespace T547
 }  // namespace esphome
-
-#endif  // USE_ESP32_FRAMEWORK_ARDUINO
