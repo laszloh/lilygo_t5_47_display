@@ -54,6 +54,10 @@ void T547::dump_config() {
   LOG_UPDATE_INTERVAL(this);
 }
 
+void T547::clear() {
+  epd_clear();
+}
+
 void T547::eink_off_() {
   ESP_LOGV(TAG, "Eink off called");
   if (panel_on_ == 0)
@@ -75,7 +79,8 @@ void T547::display() {
   uint32_t start_time = millis();
 
   epd_poweron();
-  epd_clear();
+  if(clear_)
+    epd_clear();
   epd_draw_grayscale_image(epd_full_screen(), this->buffer_);
   epd_poweroff();
 

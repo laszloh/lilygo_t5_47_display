@@ -12,6 +12,7 @@ from esphome.const import __version__ as ESPHOME_VERSION
 DEPENDENCIES = ["esp32"]
 
 CONF_GREYSCALE = "greyscale"
+CONF_AUTOCLEAR = "auto_clear"
 
 
 t547_ns = cg.esphome_ns.namespace("t547")
@@ -24,6 +25,7 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(T547),
             cv.Optional(CONF_GREYSCALE, default=False): cv.boolean,
+            cv.Optional(CONF_AUTOCLEAR, default=True): cv.boolean,
         }
     )
     .extend(cv.polling_component_schema("5s")),
@@ -46,6 +48,7 @@ async def to_code(config):
         cg.add(var.set_writer(lambda_))
 
     cg.add(var.set_greyscale(config[CONF_GREYSCALE]))
+    cg.add(var.set_clear(config[CONF_AUTOCLEAR]))
 
     cg.add_build_flag("-DBOARD_HAS_PSRAM")
 
