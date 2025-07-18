@@ -1,5 +1,6 @@
 #include "Lilygot547Battery.h"
 #include "esphome/core/log.h"
+#include "epd_driver.h"
 
 #define TAG "Lilygot547Battery"
 
